@@ -6,8 +6,8 @@ const oneTableTest = async () => {
     const db = client.db();
     // 删除表内老数据
     await db.collection('order').deleteMany({});
-    // 成功完成一个事物
-    // 开启事物
+    // 成功完成一个事务
+    // 开启事务
     let session = client.startSession();
     await session.startTransaction();
     // 插入一条新数据
@@ -19,8 +19,8 @@ const oneTableTest = async () => {
     session.endSession();
     let count = await db.collection('order').countDocuments();
     console.log(`oneTableTest-现在order表中有数据${count}条`);
-    // 事物回滚
-    // 开启事物
+    // 事务回滚
+    // 开启事务
     session = client.startSession();
     await session.startTransaction();
     try {
@@ -34,8 +34,8 @@ const oneTableTest = async () => {
         // 抛出一个异常
         throw new Error('订单异常');
     } catch (e) {
-        // 有异常，终止事物
-        console.log('异常，回滚事物');
+        // 有异常，终止事务
+        console.log('异常，回滚事务');
         // 执行完成后，发现name为order2的订单 没有插入数据库
         await session.abortTransaction();
         session.endSession();
@@ -63,7 +63,7 @@ const multiTableTest = async () => {
     console.log(`multiTableTest-现在order表中有数据${orderCount}条`);
     let productCount = await db.collection('product').countDocuments();
     console.log(`multiTableTest-现在product表中有数据${productCount}条`);
-    // 开启事物
+    // 开启事务
     const session = client.startSession();
     await session.startTransaction();
     try {
@@ -84,8 +84,8 @@ const multiTableTest = async () => {
         // 抛出一个异常
         throw new Error('多表异常');
     } catch (e) {
-        // 有异常，终止事物
-        console.log('多表异常，回滚事物');
+        // 有异常，终止事务
+        console.log('多表异常，回滚事务');
         // 执行完成后，发现name为order2的订单，name为product2的商品都没有插入数据库
         await session.abortTransaction();
         session.endSession();

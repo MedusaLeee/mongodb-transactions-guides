@@ -10,7 +10,7 @@ const oneTableTest = async () => {
     await Order.remove({});
     let count = await Order.countDocuments({});
     console.log(`oneTableTest-现在order表中有数据${count}条`);
-    // 正常事物
+    // 正常事务
     let session = await mongoose.startSession();
     await session.startTransaction();
     await Order.create({
@@ -21,7 +21,7 @@ const oneTableTest = async () => {
     session.endSession();
     count = await Order.countDocuments({});
     console.log(`oneTableTest-现在order表中有数据${count}条`);
-    // 事物回滚
+    // 事务回滚
     session = await mongoose.startSession();
     await session.startTransaction();
     try {
@@ -46,8 +46,8 @@ const oneTableTest = async () => {
         // 抛出一个异常
         throw new Error('订单异常');
     } catch (e) {
-        // 有异常，终止事物
-        console.log('异常，回滚事物');
+        // 有异常，终止事务
+        console.log('异常，回滚事务');
         await session.abortTransaction();
         session.endSession();
         count = await Order.countDocuments();
