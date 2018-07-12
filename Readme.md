@@ -1,4 +1,4 @@
-# MongoDB4.0事物采坑
+# MongoDB4.0事务采坑
 
 ## 版本
 
@@ -6,7 +6,7 @@ MongoDB server version: 4.0.0
 
 ## 限制
 
-MongoDB有三种部署方式，分别是单实例、副本集和分布式部署。目前只有副本集支持事物，
+MongoDB有三种部署方式，分别是单实例、副本集和分布式部署。目前只有副本集支持事务，
 所以只能现部署副本集的MongoDB集群了。
 
 ## 部署MongoDB副本集集群
@@ -120,8 +120,8 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
         const db = client.db();
         // 删除表内老数据
         await db.collection('order').deleteMany({});
-        // 成功完成一个事物
-        // 开启事物
+        // 成功完成一个事务
+        // 开启事务
         let session = client.startSession();
         await session.startTransaction();
         // 插入一条新数据
@@ -133,8 +133,8 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
         session.endSession();
         let count = await db.collection('order').countDocuments();
         console.log(`oneTableTest-现在order表中有数据${count}条`);
-        // 事物回滚
-        // 开启事物
+        // 事务回滚
+        // 开启事务
         session = client.startSession();
         await session.startTransaction();
         try {
@@ -148,8 +148,8 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
             // 抛出一个异常
             throw new Error('订单异常');
         } catch (e) {
-            // 有异常，终止事物
-            console.log('异常，回滚事物');
+            // 有异常，终止事务
+            console.log('异常，回滚事务');
             // 执行完成后，发现name为order2的订单 没有插入数据库
             await session.abortTransaction();
             session.endSession();
@@ -177,7 +177,7 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
         console.log(`multiTableTest-现在order表中有数据${orderCount}条`);
         let productCount = await db.collection('product').countDocuments();
         console.log(`multiTableTest-现在product表中有数据${productCount}条`);
-        // 开启事物
+        // 开启事务
         const session = client.startSession();
         await session.startTransaction();
         try {
@@ -198,8 +198,8 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
             // 抛出一个异常
             throw new Error('多表异常');
         } catch (e) {
-            // 有异常，终止事物
-            console.log('多表异常，回滚事物');
+            // 有异常，终止事务
+            console.log('多表异常，回滚事务');
             // 执行完成后，发现name为order2的订单，name为product2的商品都没有插入数据库
             await session.abortTransaction();
             session.endSession();
@@ -221,7 +221,7 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
 
 ![result](images/mongo-driver-result.png)
 
-由结果看`多表`和`单表`事物都是支持的，且事物未结束前，出于事物中的操作是不会真实入库的。
+由结果看`多表`和`单表`事务都是支持的，且事务未结束前，出于事务中的操作是不会真实入库的。
 
 ## Mongoose Demo
 
@@ -240,7 +240,7 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
         await Order.remove({});
         let count = await Order.countDocuments({});
         console.log(`oneTableTest-现在order表中有数据${count}条`);
-        // 正常事物
+        // 正常事务
         let session = await mongoose.startSession();
         await session.startTransaction();
         await Order.create({
@@ -251,7 +251,7 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
         session.endSession();
         count = await Order.countDocuments({});
         console.log(`oneTableTest-现在order表中有数据${count}条`);
-        // 事物回滚
+        // 事务回滚
         session = await mongoose.startSession();
         await session.startTransaction();
         try {
@@ -276,8 +276,8 @@ MongoDB有三种部署方式，分别是单实例、副本集和分布式部署�
             // 抛出一个异常
             throw new Error('订单异常');
         } catch (e) {
-            // 有异常，终止事物
-            console.log('异常，回滚事物');
+            // 有异常，终止事务
+            console.log('异常，回滚事务');
             await session.abortTransaction();
             session.endSession();
             count = await Order.countDocuments();
