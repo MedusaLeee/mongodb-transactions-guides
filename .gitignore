@@ -122,3 +122,4 @@ fabric.properties
 !.vscode/extensions.json
 .DS_Store
 .idea/
+.vscode
